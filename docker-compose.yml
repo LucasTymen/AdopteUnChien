@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  app:
+    # --- SCRIPT D'ORIGINE (commencer) ---
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: adopte-un-chien-app
+    volumes:
+      - ./:/app
+    environment:
+      NODE_ENV: development
+    ports:
+      - '8080:8080'
+    # --- SCRIPT D'ORIGINE (fin) ---
+
+    # --- AJOUT ANDROID (commencer) ---
+    depends_on:
+      - android
+    # --- AJOUT ANDROID (fin) ---
+
+  # --- AJOUT ANDROID (commencer) ---
+  android:
+    image: gradle:7.5-jdk11  # Image Android Gradle
+    container_name: adopte-un-chien-android
+    volumes:
+      - ./:/app
+      - gradle_cache:/root/.gradle  # Cache Gradle pour accélérer les builds
+    environment:
+      ANDROID_HOME: /opt/android-sdk-linux
+      PATH: /opt/android-sdk-linux/cmdline-tools/bin:/opt/android-sdk-linux/platform-tools:/opt/android-sdk-linux/build-tools/33.0.2:$PATH
+      JAVA_HOME: /usr/lib/jvm/java-11-openjdk-amd64
+    working_dir: /app/android
+    command: ./gradlew build
+  # --- AJOUT ANDROID (fin) ---
+
+volumes:
+  gradle_cache:  # Cache pour optimiser les builds Gradle
